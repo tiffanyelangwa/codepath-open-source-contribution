@@ -11,3 +11,9 @@ I'm interested in this issue because:
 4. The issue provides a reproducible example, allowing me to focus on understanding the bug and the development workflow.
 
 From reading the issue description, I understand that `MultiplierGate(1, 1).decompose()` fails because the gate definition is created with an incorrect number of qubits. My goal is to reproduce the bug, investigate the implementation of `MultiplierGate`, identify the source of the mismatch, and contribute a fix along with any necessary tests.
+
+Status Update 
+
+After further investigation of the issue discussion and linked pull requests, I found that this bug has already been addressed in subsequent contributions. In particular, a related pull request (#16288) implemented the fix by correcting how num_result_qubits is passed into multiplier_qft_r17, which resolves the original decomposition error.
+
+The issue was eventually closed as a duplicate of another active pull request (#16187), and the fix was confirmed by maintainers in the discussion thread. As a result, this issue is no longer actively available for implementation.
