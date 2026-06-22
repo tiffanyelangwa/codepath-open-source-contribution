@@ -35,3 +35,6 @@ The test suite completed successfully for all target frameworks:
 # Branch Link
 
 https://github.com/tiffanyelangwa/ironpython3/tree/fix-test-zlib-parallel-safe
+
+# Previous Issue Investigation
+I initially investigated Qiskit issue #16168, but discovered that the issue had already been fixed and closed. I then selected IronPython issue #1177 for my open-source contribution.
