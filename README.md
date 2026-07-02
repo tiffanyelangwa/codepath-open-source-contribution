@@ -1,151 +1,256 @@
-# Why I Chose This Issue
+# Open Source Contribution – IronPython Issue #1177
 
-I chose IronPython issue **#1177, "IronPython.modules.misc.test_zlib is not parallel safe,"** because it was labeled as a good first issue and provided an opportunity to contribute to a large, production-quality open-source project.
+## Why I Chose This Issue
 
-As part of CodePath's AI301 course, one of our assignments is to make a meaningful open-source contribution. I wanted to gain experience navigating an unfamiliar codebase, communicating with maintainers, understanding an existing issue, and following the complete contribution workflow from investigation to pull request.
+I chose IronPython issue #1177, **"IronPython.modules.misc.test_zlib is not parallel safe,"** because it was labeled as a good first issue and gave me the opportunity to contribute to a large open-source Python implementation.
 
-Initially, the issue described a concurrency problem where the `test_zlib` test could fail when executed in parallel because it relied on the shared file `test_data.gz`. My original goal was to reproduce the bug, understand how IronPython organized its test suite, and implement a fix.
+I am currently taking CodePath's AI301 course, where one of our assignments is to make an open-source contribution. I wanted an issue that would help me learn the complete open-source workflow, including investigating an issue, communicating with maintainers, setting up the development environment, implementing a change, testing it, and submitting a pull request.
 
----
-
-# Issue Investigation
-
-Before making any code changes, I reviewed the issue discussion and examined the related pull requests referenced by the maintainer.
-
-After commenting on the issue, the maintainer explained that the original concurrency bug had already been resolved in Pull Request **#2002**. The remaining work was to remove an obsolete configuration entry that had been added before the concurrency issue was fixed.
-
-Rather than attempting to fix a problem that no longer existed, I updated my implementation plan based on the maintainer's guidance.
+The original issue described a concurrency problem in the `test_zlib` test suite, where running tests in parallel could fail because of a shared file (`test_data.gz`). My initial goal was to reproduce the bug, understand how the tests were configured, identify the root cause, and contribute a fix.
 
 ---
 
-# Implementation Plan
+# Environment Setup
 
-My implementation plan was to:
+To begin working on the issue, I:
 
-1. Locate the configuration controlling the `test_zlib` test.
-2. Verify that the `NotParallelSafe` setting was no longer required.
-3. Remove the obsolete configuration entry.
-4. Run the relevant test suite to ensure the change introduced no regressions.
-5. Submit a pull request for review.
-
----
-
-# Implementation Progress
-
-## Branch
-
-`fix-test-zlib-parallel-safe`
-
-## File Modified
-
-`tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini`
-
-## Change Made
-
-Removed the obsolete configuration entry:
-
-```ini
-NotParallelSafe=true # test_data.gz
-```
-
-from the following section:
-
-```ini
-[IronPython.modules.misc.test_zlib]
-```
-
-because the test is now parallel-safe.
-
-## Commit
-
-Commit Hash:
+1. Forked the IronPython repository.
+2. Cloned my fork locally.
+3. Created a feature branch named:
 
 ```
-8680f99
+fix-test-zlib-parallel-safe
 ```
 
-Commit Message:
+4. Searched for the configuration mentioned in the issue using:
 
+```powershell
+git grep test_data.gz
 ```
-Remove obsolete NotParallelSafe flag for test_zlib
-```
 
-## Pull Request
-
-I submitted Pull Request **#2053**, which was reviewed by the project maintainer, approved, and merged into the `main` branch.
-
----
-
-# Challenges Faced
-
-One of the biggest challenges was discovering that the original issue had already been resolved by another contributor before I began implementing a fix.
-
-Initially, I expected to investigate and fix a concurrency bug. However, after communicating with the maintainer, I learned that another pull request had already addressed the underlying problem. Instead of abandoning the issue, I worked with the maintainer to identify the remaining cleanup work that was still valuable to the project.
-
-Another challenge was setting up the local development environment. My first attempt to run the test suite failed because the required .NET SDK was not installed. After installing the SDK, I reran the tests successfully across all supported target frameworks.
-
----
-
-# Testing
-
-## Automated Testing
-
-To verify my change, I ran:
+5. Attempted to run the relevant test suite using:
 
 ```powershell
 .\make.ps1 test-zlib
 ```
 
-The test suite completed successfully for all supported target frameworks:
+### Challenges Encountered
 
-- `net462`
-- `net8.0`
-- `net10.0`
+The first time I attempted to run the tests, the command failed because my machine could not locate a .NET SDK.
 
-## Manual Verification
+The error reported that no .NET SDKs were available. I verified my installation using:
 
-I manually verified that:
+```powershell
+dotnet --info
+```
 
-- the obsolete configuration entry had been removed,
-- no unrelated files were modified,
-- the change remained fully scoped to Issue #1177.
+After confirming the SDK installation and rerunning the command, the test suite executed successfully.
 
-### Note on Additional Tests
-
-I did not add a new test because this contribution did not change the behavior of the test itself. The maintainer explained that the concurrency issue had already been resolved in an earlier pull request. My contribution only removed an obsolete `NotParallelSafe` configuration flag after confirming that the existing test suite passed successfully.
+Working through this setup helped me become familiar with the IronPython development environment and build process.
 
 ---
 
-# Files Changed
+# Reproducing the Issue
 
-- `tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini`
+Although the original concurrency bug had already been fixed before I began working on the issue, I followed the investigation process below.
 
-No unrelated files were modified.
+## Steps
+
+1. Fork and clone the repository.
+2. Create a feature branch.
+3. Search for references to `test_data.gz`.
+
+```powershell
+git grep test_data.gz
+```
+
+4. Open:
+
+```
+tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini
+```
+
+5. Locate:
+
+```
+[IronPython.modules.misc.test_zlib]
+```
+
+6. Run:
+
+```powershell
+.\make.ps1 test-zlib
+```
 
 ---
 
-# Branch
+# Expected vs. Actual Behavior
+
+### Expected
+
+Based on the issue description, the `test_zlib` tests were expected to fail when executed in parallel because they relied on a shared file (`test_data.gz`). If this was still true, the `NotParallelSafe` flag would still be necessary.
+
+### Actual
+
+After investigating the issue discussion and previous pull requests, I learned that the concurrency bug had already been fixed in PR #2002.
+
+Running the tests confirmed that they completed successfully across all supported frameworks, meaning the `NotParallelSafe=true` configuration was no longer necessary.
+
+---
+
+# Investigation
+
+To understand why the issue still existed despite the tests passing, I reviewed:
+
+- Issue #1177
+- Pull Request #1397
+- Pull Request #2002
+
+From the maintainer's response, I learned that:
+
+- PR #1397 originally marked the test as `NotParallelSafe`.
+- PR #2002 later fixed the concurrency issue.
+- However, the configuration entry added in #1397 was never removed.
+
+The maintainer suggested removing the obsolete configuration, which became the scope of my contribution.
+
+---
+
+# Files Investigated
+
+During the investigation I primarily examined:
+
+```
+tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini
+```
+
+Specifically, I modified the section:
+
+```
+[IronPython.modules.misc.test_zlib]
+```
+
+which contained the obsolete configuration:
+
+```
+NotParallelSafe=true # test_data.gz
+```
+
+---
+
+# Solution Plan (UMPIRE)
+
+## Understand
+
+The issue stated that `test_zlib` was unsafe to execute in parallel because multiple tests could access the same file.
+
+## Match
+
+I compared the issue description with the current repository state and the linked pull requests. The previous fixes showed that the concurrency problem itself had already been resolved.
+
+## Plan
+
+If the concurrency bug was already fixed, remove the obsolete `NotParallelSafe=true` configuration and verify that the tests still pass.
+
+## Implement
+
+Removed the obsolete configuration from:
+
+```
+tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini
+```
+
+## Review
+
+Ran:
+
+```powershell
+.\make.ps1 test-zlib
+```
+
+The tests passed successfully.
+
+## Evaluate
+
+The project no longer needs to treat `test_zlib` as non-parallel-safe. Removing the outdated configuration simplifies the test manifest while preserving correct behavior.
+
+---
+
+# Implementation Progress
+
+### Branch
+
+```
+fix-test-zlib-parallel-safe
+```
+
+### File Modified
+
+```
+tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini
+```
+
+### Commit
+
+```
+8680f99
+Remove obsolete NotParallelSafe flag for test_zlib
+```
+
+### Pull Request
+
+IronPython PR #2053
+
+The pull request was reviewed, approved by the maintainer, and merged into the project's main branch.
+
+---
+
+# Challenges Faced
+
+One challenge was discovering that the original issue had already been fixed before I started working on it.
+
+Instead of abandoning the issue, I communicated with the maintainer, who explained that while the concurrency bug had been resolved, the repository still contained an obsolete configuration entry that could safely be removed.
+
+Another challenge was configuring my local development environment. Initially, the test suite could not run because the .NET SDK was not detected. After resolving the SDK configuration, I successfully ran the relevant tests and verified my change.
+
+These experiences helped me better understand how open-source contributions often require investigation and communication before writing code.
+
+---
+
+# Testing Strategy
+
+I validated the change by running:
+
+```powershell
+.\make.ps1 test-zlib
+```
+
+The tests completed successfully for:
+
+- net462
+- net8.0
+- net10.0
+
+### Manual Verification
+
+I also manually confirmed that:
+
+- the obsolete `NotParallelSafe` entry had been removed;
+- no unrelated files were modified;
+- the change was limited to the intended issue.
+
+No additional tests were added because the maintainer confirmed that the underlying concurrency bug had already been fixed in a previous pull request. My contribution was limited to removing the obsolete configuration entry.
+
+---
+
+# Branch Link
 
 https://github.com/tiffanyelangwa/ironpython3/tree/fix-test-zlib-parallel-safe
 
 ---
 
-# Pull Request
-
-https://github.com/IronLanguages/ironpython3/pull/2053
-
-Status: **Merged** ✅
-
----
-
 # Previous Issue Investigation
 
-Before contributing to IronPython, I investigated Qiskit issue #16168. During my investigation, I discovered that the issue had already been fixed and closed by another contributor. Rather than duplicating existing work, I selected IronPython issue #1177 and completed my open-source contribution there.
+Before contributing to IronPython, I investigated Qiskit issue #16168. During my investigation, I found that the issue had already been fixed and closed, so I selected a different active issue that was appropriate for contribution.
 
----
-
-# Reflection
-
-This project gave me valuable experience contributing to a large open-source codebase. I learned how to investigate an issue, communicate with maintainers, set up an unfamiliar development environment, follow an existing testing workflow, and submit a pull request that met the project's contribution standards.
-
-Although the original bug had already been resolved, I learned that open-source contributions are not always about writing large amounts of code. Sometimes they involve improving the codebase by removing outdated configurations, cleaning up technical debt, and working collaboratively with maintainers to identify meaningful improvements. My pull request was reviewed, approved, and merged, giving me firsthand experience with the complete open-source contribution process.
+Working through both investigations gave me valuable experience navigating large open-source projects, communicating with maintainers, and adapting when the status of an issue changed.
