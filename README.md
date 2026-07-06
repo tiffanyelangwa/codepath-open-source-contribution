@@ -254,3 +254,56 @@ https://github.com/tiffanyelangwa/ironpython3/tree/fix-test-zlib-parallel-safe
 Before contributing to IronPython, I investigated Qiskit issue #16168. During my investigation, I found that the issue had already been fixed and closed, so I selected a different active issue that was appropriate for contribution.
 
 Working through both investigations gave me valuable experience navigating large open-source projects, communicating with maintainers, and adapting when the status of an issue changed.
+
+---
+
+# Pull Request
+
+**Pull Request:** https://github.com/IronLanguages/ironpython3/pull/2053
+
+## Summary
+
+Although the original concurrency bug described in Issue #1177 had already been fixed by Pull Request #2002, the repository still contained an obsolete configuration entry marking the `test_zlib` test as not parallel-safe.
+
+Following the maintainer's recommendation, I removed the outdated:
+
+```text
+NotParallelSafe=true # test_data.gz
+```
+
+entry from:
+
+```text
+tests/IronPython.Tests/Cases/IronPythonCasesManifest.ini
+```
+
+I verified that the relevant test suite continued to pass across all supported target frameworks before submitting the pull request.
+
+## Current Status
+
+- Pull Request opened against the upstream IronPython repository.
+- Maintainer reviewed and approved the change.
+- Pull Request merged into the project's `main` branch.
+
+---
+
+# Maintainer Feedback Log
+
+| Date | Feedback | My Response |
+|------|----------|-------------|
+| June 15, 2026 | The maintainer explained that the original concurrency issue had already been fixed in PR #2002, but the `NotParallelSafe` entry added in PR #1397 could now be removed. | I updated my implementation plan, removed the obsolete configuration entry, reran the `test-zlib` test suite, committed the change (`8680f99`), and submitted Pull Request #2053. |
+| June 16, 2026 | The maintainer approved the pull request. | No additional code changes were requested. The pull request was subsequently merged into the upstream repository. |
+
+---
+
+# Learnings & Reflections
+
+This contribution taught me that open-source development involves much more than simply writing code. Before making any changes, I needed to understand the issue history, review previous pull requests, communicate with the maintainer, and verify whether the reported problem still existed.
+
+One of the biggest lessons I learned was that an issue can evolve over time. Although Issue #1177 initially described a concurrency bug, the underlying bug had already been fixed before I began working on it. Instead of abandoning the issue, I discussed it with the maintainer and identified a smaller but still valuable improvement by removing an obsolete configuration entry.
+
+I also became more comfortable working with Git, feature branches, pull requests, and running project-specific test suites in a large unfamiliar codebase. Troubleshooting my local .NET setup reinforced the importance of understanding the development environment before debugging application code.
+
+If I were starting a similar contribution again, I would spend more time reviewing linked pull requests and commit history before beginning implementation. Doing so would help me understand the current state of the issue earlier and allow me to adjust my plan more efficiently.
+
+Overall, this project gave me practical experience with the complete open-source contribution workflow—from issue investigation and maintainer communication to implementation, testing, code review, and ultimately having a pull request merged into the upstream project.
